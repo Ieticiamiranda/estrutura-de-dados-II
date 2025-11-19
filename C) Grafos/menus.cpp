@@ -1,6 +1,8 @@
 #include "menus.h"
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
+
 using namespace std;
 
 int menuPrincipal()
@@ -43,13 +45,11 @@ void inserirAresta(Graph *G)
 {
     int o, d, p;
     system("cls");
-    cout << "> Digite origem, destino e peso: ";
+    cout << "Digite origem, destino e peso: ";
     cin >> o >> d >> p;
     G->inserirArco(o, d, p);
-    G->matrizAdj();
-    G->numArestas();
-    G->grauG();
-    cout << "Aresta inserida!!" << endl;
+    G->atualizaPropriedades();
+    cout << "> Aresta inserida!!" << endl;
     system("pause");
 }
 
@@ -57,26 +57,115 @@ void removerAresta(Graph *G)
 {
     int o, d;
     system("cls");
-    cout << "> Digite origem e destino: ";
+    cout << "Digite origem e destino: ";
     cin >> o >> d;
     G->removerArco(o, d);
-    G->matrizAdj();
-    G->numArestas();
-    G->grauG();
-    cout << "Aresta removida!!" << endl;
+    G->atualizaPropriedades();
+    cout << "> Aresta removida!!" << endl;
+    system("pause");
+}
+
+void imprimirMatrizUI(Graph *G, int tipo)
+{
+    int V = G->getV();
+    if (V == 0) return;
+
+    const int larguraColuna = 6;
+    system("cls");
+    cout << (tipo == 1 ? "===== MATRIZ DE DISTANCIAS =====" : "===== MATRIZ DE ADJACENCIA =====") << endl << endl;
+    
+    cout << right << setw(larguraColuna) << " "; 
+    for (int j = 0; j < V; ++j) cout << setw(larguraColuna) << j;
+    cout << endl << setw(larguraColuna) << " ";
+    for (int j = 0; j < V; ++j) cout << setw(larguraColuna) << "------";
+    cout << endl;
+
+    for (int i = 0; i < V; i++)
+    {
+        cout << setw(larguraColuna - 2) << i << " |"; 
+        for (int j = 0; j < V; j++)
+        {
+            cout << setw(larguraColuna);
+            int val = (tipo == 1) ? G->getDist(i, j) : G->getAdj(i, j);
+            if (val == INF) cout << "inf";
+            else cout << val;
+        }
+        cout << endl; 
+    }
+    cout << endl;
+    system("pause");
+}
+
+void exibirGrauGUI(Graph *G)
+{
+    system("cls");
+    int V = G->getV();
+    if (V == 0) return;
+
+    cout << "Grau dos vertices:" << endl;
+    for (int i = 0; i < V; i++)
+        cout << "vertice " << i << " -> " << G->getGrau(i) << endl;
+    system("pause");
+}
+
+void listaGrafoUI(Graph *G)
+{
+    system("cls");
+    int V = G->getV();
+    
+    cout << endl << "Grafo G(V,A)" << endl;
+    cout << "> Numero de Vertices: " << V << endl;
+    cout << "> Numero de Arestas: " << G->getA() << endl;
+
+    cout << setfill(' ');
+    cout << "\n  +----------+-------------------------------+" << endl;
+    cout << "  | " << setw(8) << right << "VERTICE" << " | " << left << "ARESTAS" << endl;
+    cout << "  +----------+-------------------------------+" << endl;
+    cout << left;
+
+    for (int v = 0; v < V; ++v)
+    {
+        cout << "  | " << "   " << setw(5) << left << v << " | ";
+        bool primeiro = true;
+        for (int w = 0; w < V; ++w)
+        {
+            if (G->getAdj(v, w) == 1)
+            {
+                if (!primeiro) cout << ", ";
+                cout << w;
+                primeiro = false;
+            }
+        }
+        if (primeiro) cout << "(Nenhum)";
+        cout << endl;
+    }
+    cout << "  +----------+-------------------------------+" << endl;
     system("pause");
 }
 
 void executarFloyd()
 {
     system("cls");
-    Graph G;
-    if (G.entGrafoArquivo("grafo.txt") > 0)
+    Graph G_temp;
+    
+    if (G_temp.entGrafoArquivo("grafo.txt") > 0)
     {
-        G.matrizAdj();
-        G.numArestas();
-        G.grauG();
-        G.floydWarshall();
+        int** matrizFloyd = G_temp.calcularFloydWarshall();
+        int V = G_temp.getV();
+
+        cout << "Matriz de caminhos minimos (floyd-warshall):" << endl;
+        for (int i = 0; i < V; i++)
+        {
+            for (int j = 0; j < V; j++)
+            {
+                if (matrizFloyd[i][j] == INF) cout << "inf ";
+                else cout << matrizFloyd[i][j] << " ";
+            }
+            cout << endl;
+        }
+        
+        for(int i=0; i < V; i++) delete[] matrizFloyd[i];
+        delete[] matrizFloyd;
     }
     else
     {

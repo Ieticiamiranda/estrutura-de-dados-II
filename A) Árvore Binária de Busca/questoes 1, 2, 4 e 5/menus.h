@@ -3,6 +3,5 @@
 
 int menuPrincipal();
 int menuArvoreInteiros();
-void menuArvorePessoas();
 
 #endif

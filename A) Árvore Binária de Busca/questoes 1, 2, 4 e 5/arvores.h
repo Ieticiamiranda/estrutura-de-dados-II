@@ -44,29 +44,4 @@ public:
     void verificarArvoreCheia();
 };
 
-struct Pessoa
-{
-    string nome;
-    char sexo;
-    int idade;
-    double peso;
-};
-
-struct NoArvore
-{
-    Pessoa dados;
-    NoArvore *esq;
-    NoArvore *dir;
-
-    NoArvore(Pessoa p);
-};
-
-void gerarListasOrdenadas(NoArvore *RAIZ,
-                          vector<Pessoa> &listaHomens,
-                          vector<Pessoa> &listaMulheres);
-
-NoArvore *inserirPessoa(NoArvore *raiz, Pessoa p);
-void imprimirLista(const string &titulo, const vector<Pessoa> &lista);
-void limparArvore(NoArvore *no);
-
-#endif
+#endif 

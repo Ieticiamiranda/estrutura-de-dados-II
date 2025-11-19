@@ -122,7 +122,7 @@ NO *ArvoreBin::removerRecursivo(NO *no, int valorRemover)
     return no;
 }
 
-int ArvoreBin::encontrarMaximoRecursivo(NO *no)
+int ArvoreBin::encontrarMaximoRecursivo(NO *no) // questao 2 - parte A
 {
     if (no == NULL)
         return INT_MIN;
@@ -131,7 +131,7 @@ int ArvoreBin::encontrarMaximoRecursivo(NO *no)
     return encontrarMaximoRecursivo(no->dir);
 }
 
-void ArvoreBin::encontrarRepetidosRecursivo(NO *no, bool &encontrado)
+void ArvoreBin::encontrarRepetidosRecursivo(NO *no, bool &encontrado) // questao 4 - parte A
 {
     if (no == NULL)
         return;
@@ -144,7 +144,7 @@ void ArvoreBin::encontrarRepetidosRecursivo(NO *no, bool &encontrado)
     encontrarRepetidosRecursivo(no->dir, encontrado);
 }
 
-int ArvoreBin::ArvoreCheia(NO *no)
+int ArvoreBin::ArvoreCheia(NO *no) // questao 5 - parte A
 {
     if (no == NULL)
         return 1;
@@ -213,7 +213,7 @@ void ArvoreBin::listar()
     cout << endl;
 }
 
-void ArvoreBin::encontrarMaximo()
+void ArvoreBin::encontrarMaximo() // questao 2 - parte A
 {
     int valorMaximo = encontrarMaximoRecursivo(raiz);
     if (valorMaximo == INT_MIN)
@@ -238,7 +238,7 @@ void ArvoreBin::imprimirEmOrdem()
     cout << endl;
 }
 
-void ArvoreBin::mostrarRepetidos()
+void ArvoreBin::mostrarRepetidos() // questao 4 - parte A
 {
     if (raiz == NULL)
     {
@@ -254,7 +254,7 @@ void ArvoreBin::mostrarRepetidos()
     }
 }
 
-void ArvoreBin::verificarArvoreCheia()
+void ArvoreBin::verificarArvoreCheia() // questao 5 - parte A
 {
     int resultado = ArvoreCheia(raiz);
     cout << "--------------------------------------------" << endl;
@@ -268,79 +268,4 @@ void ArvoreBin::verificarArvoreCheia()
         cout << "> A arvore NAO esta cheia (retorno 0)." << endl;
         cout << "> Ou seja, pelo menos um no tem apenas 1 filho." << endl;
     }
-}
-
-NoArvore::NoArvore(Pessoa p) : dados(p), esq(NULL), dir(NULL) {}
-
-void preencherListasPorSexo(NoArvore *no,
-                            vector<Pessoa> &listaHomens,
-                            vector<Pessoa> &listaMulheres)
-{
-    if (no == NULL)
-    {
-        return;
-    }
-    preencherListasPorSexo(no->esq, listaHomens, listaMulheres);
-    if (no->dados.sexo == 'M' || no->dados.sexo == 'm')
-    {
-        listaHomens.push_back(no->dados);
-    }
-    else if (no->dados.sexo == 'F' || no->dados.sexo == 'f')
-    {
-        listaMulheres.push_back(no->dados);
-    }
-    preencherListasPorSexo(no->dir, listaHomens, listaMulheres);
-}
-
-void gerarListasOrdenadas(NoArvore *RAIZ,
-                          vector<Pessoa> &listaHomens,
-                          vector<Pessoa> &listaMulheres)
-{
-    listaHomens.clear();
-    listaMulheres.clear();
-    preencherListasPorSexo(RAIZ, listaHomens, listaMulheres);
-}
-
-NoArvore *inserirPessoa(NoArvore *raiz, Pessoa p)
-{
-    if (raiz == NULL)
-    {
-        return new NoArvore(p);
-    }
-    if (p.nome < raiz->dados.nome)
-    {
-        raiz->esq = inserirPessoa(raiz->esq, p);
-    }
-    else
-    {
-        raiz->dir = inserirPessoa(raiz->dir, p);
-    }
-    return raiz;
-}
-
-void imprimirLista(const string &titulo, const vector<Pessoa> &lista)
-{
-    cout << "--- " << titulo << " ---" << endl;
-    if (lista.empty())
-    {
-        cout << "(Lista vazia)" << endl;
-        return;
-    }
-    for (const auto &p : lista)
-    {
-        cout << "Nome: " << p.nome
-             << ", Sexo: " << p.sexo
-             << ", Idade: " << p.idade
-             << ", Peso: " << p.peso << endl;
-    }
-    cout << endl;
-}
-
-void limparArvore(NoArvore *no)
-{
-    if (no == NULL)
-        return;
-    limparArvore(no->esq);
-    limparArvore(no->dir);
-    delete no;
 }

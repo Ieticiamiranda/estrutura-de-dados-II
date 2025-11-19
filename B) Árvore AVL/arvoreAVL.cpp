@@ -1,248 +1,154 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <algorithm> // Para std::max
-#include <limits>    // Para limpar o buffer de entrada
+#include "arvoreAVL.h"
 
-// Usar o namespace std para facilitar
-using namespace std;
+// --------------------------------------------------
+// Implementação do Construtor do Nó
+// --------------------------------------------------
+No::No(string n, char s, int i, float p)
+    : nome(n), sexo(s), idade(i), peso(p), altura(1), esq(nullptr), dir(nullptr) {}
 
-/**
- * 1. ESTRUTURAS DE DADOS
- */
+// --------------------------------------------------
+// Implementação da Classe Arvore
+// --------------------------------------------------
 
-// Estrutura para os dados da pessoa (fornecida por você)
-struct Pessoa {
-    string nome;
-    char sexo;
-    int idade;
-    double peso;
-
-    Pessoa(string n = "", char s = ' ', int i = 0, double p = 0.0)
-        : nome(n), sexo(s), idade(i), peso(p) {}
-};
-
-// Estrutura do Nó da Árvore (Modificada para AVL)
-struct NoArvore {
-    Pessoa dados;
-    NoArvore *esq;
-    NoArvore *dir;
-    int altura; // Campo ADICIONAL para AVL
-
-    // Construtor modificado
-    NoArvore(Pessoa p) : dados(p), esq(NULL), dir(NULL), altura(1) {}
-};
-
-
-/**
- * 2. FUNÇÕES AUXILIARES DA AVL
- */
-
-// Retorna a altura de um nó (seguro para nós nulos)
-int alturaDoNo(NoArvore *no) {
-    if (no == NULL)
-        return 0;
-    return no->altura;
+Arvore::Arvore() {
+    raiz = nullptr;
 }
 
-// Atualiza a altura de um nó com base em seus filhos
-void atualizarAltura(NoArvore *no) {
-    if (no != NULL) {
-        no->altura = 1 + max(alturaDoNo(no->esq), alturaDoNo(no->dir));
-    }
+// ---- Utilitários AVL ----
+
+int Arvore::getAltura(No* n) {
+    if (n == nullptr) return 0;
+    return n->altura;
 }
 
-// Calcula o Fator de Balanceamento (FB) de um nó
-int fatorBalanceamento(NoArvore *no) {
-    if (no == NULL)
-        return 0;
-    // FB = Altura(Esquerda) - Altura(Direita)
-    return alturaDoNo(no->esq) - alturaDoNo(no->dir);
+int Arvore::getBalanceamento(No* n) {
+    if (n == nullptr) return 0;
+    return getAltura(n->esq) - getAltura(n->dir);
 }
 
-/**
- * 3. ROTAÇÕES DA AVL
- */
+// ---- Rotações ----
 
-/*
-       y                               x
-      / \                             / \
-     x   T3  -- Rotação Direita(y) ->  T1  y
-    / \                                 / \
-   T1  T2                               T2  T3
-*/
-NoArvore *rotacaoDireita(NoArvore *y) {
-    NoArvore *x = y->esq;
-    NoArvore *T2 = x->dir;
+No* Arvore::rotacaoDireita(No* y) {
+    No* x = y->esq;
+    No* T2 = x->dir;
 
-    // Realiza a rotação
     x->dir = y;
     y->esq = T2;
 
-    // Atualiza alturas (IMPORTANTE: atualizar y ANTES de x)
-    atualizarAltura(y);
-    atualizarAltura(x);
+    y->altura = max(getAltura(y->esq), getAltura(y->dir)) + 1;
+    x->altura = max(getAltura(x->esq), getAltura(x->dir)) + 1;
 
-    return x; // Nova raiz
+    return x;
 }
 
-/*
-    x                               y
-   / \                             / \
-  T1  y   -- Rotação Esquerda(x) -> x   T3
-     / \                           / \
-    T2  T3                         T1  T2
-*/
-NoArvore *rotacaoEsquerda(NoArvore *x) {
-    NoArvore *y = x->dir;
-    NoArvore *T2 = y->esq;
+No* Arvore::rotacaoEsquerda(No* x) {
+    No* y = x->dir;
+    No* T2 = y->esq;
 
-    // Realiza a rotação
     y->esq = x;
     x->dir = T2;
 
-    // Atualiza alturas (IMPORTANTE: atualizar x ANTES de y)
-    atualizarAltura(x);
-    atualizarAltura(y);
+    x->altura = max(getAltura(x->esq), getAltura(x->dir)) + 1;
+    y->altura = max(getAltura(y->esq), getAltura(y->dir)) + 1;
 
-    return y; // Nova raiz
+    return y;
 }
 
-// Função auxiliar para encontrar o menor nó (sucessor em ordem)
-NoArvore* menorNo(NoArvore* no) {
-    NoArvore* atual = no;
-    while (atual->esq != NULL) {
+No* Arvore::menorNo(No* node) {
+    No* atual = node;
+    while (atual->esq != nullptr)
         atual = atual->esq;
-    }
     return atual;
 }
 
+// ---- Lógica de Inserção ----
 
-/**
- * 4. FUNÇÕES PRINCIPAIS DO MENU
- */
+No* Arvore::inserirAux(No* no, string nome, char sexo, int idade, float peso) {
+    if (no == nullptr)
+        return new No(nome, sexo, idade, peso);
 
-// --- Inserir Dado (Versão AVL) ---
-NoArvore *inserirPessoa(NoArvore *raiz, Pessoa p) {
-    // 1. Inserção padrão de BST
-    if (raiz == NULL) {
-        return new NoArvore(p);
+    if (nome < no->nome)
+        no->esq = inserirAux(no->esq, nome, sexo, idade, peso);
+    else if (nome > no->nome)
+        no->dir = inserirAux(no->dir, nome, sexo, idade, peso);
+    else
+        return no; // Não permite duplicatas
+
+    no->altura = 1 + max(getAltura(no->esq), getAltura(no->dir));
+
+    int balance = getBalanceamento(no);
+
+    // Casos de Rotação
+    if (balance > 1 && nome < no->esq->nome)
+        return rotacaoDireita(no);
+
+    if (balance < -1 && nome > no->dir->nome)
+        return rotacaoEsquerda(no);
+
+    if (balance > 1 && nome > no->esq->nome) {
+        no->esq = rotacaoEsquerda(no->esq);
+        return rotacaoDireita(no);
     }
 
-    if (p.nome < raiz->dados.nome) {
-        raiz->esq = inserirPessoa(raiz->esq, p);
-    } else if (p.nome > raiz->dados.nome) {
-        raiz->dir = inserirPessoa(raiz->dir, p);
-    } else {
-        // Nomes duplicados não são permitidos
-        cout << "Erro: Pessoa com nome '" << p.nome << "' ja existe." << endl;
-        return raiz;
+    if (balance < -1 && nome < no->dir->nome) {
+        no->dir = rotacaoDireita(no->dir);
+        return rotacaoEsquerda(no);
     }
 
-    // 2. Atualizar a altura deste nó ancestral
-    atualizarAltura(raiz);
-
-    // 3. Obter o fator de balanceamento para verificar se desbalanceou
-    int fb = fatorBalanceamento(raiz);
-
-    // 4. Rebalancear, se necessário (4 casos)
-
-    // Caso Esquerda-Esquerda (LL)
-    if (fb > 1 && p.nome < raiz->esq->dados.nome) {
-        return rotacaoDireita(raiz);
-    }
-
-    // Caso Direita-Direita (RR)
-    if (fb < -1 && p.nome > raiz->dir->dados.nome) {
-        return rotacaoEsquerda(raiz);
-    }
-
-    // Caso Esquerda-Direita (LR)
-    if (fb > 1 && p.nome > raiz->esq->dados.nome) {
-        raiz->esq = rotacaoEsquerda(raiz->esq);
-        return rotacaoDireita(raiz);
-    }
-
-    // Caso Direita-Esquerda (RL)
-    if (fb < -1 && p.nome < raiz->dir->dados.nome) {
-        raiz->dir = rotacaoDireita(raiz->dir);
-        return rotacaoEsquerda(raiz);
-    }
-
-    // Se já estava balanceado, retorna a raiz original
-    return raiz;
+    return no;
 }
 
-// --- Remoção de Dado (Versão AVL) ---
-NoArvore *removerPessoa(NoArvore *raiz, string nome) {
-    // 1. Remoção padrão de BST
-    if (raiz == NULL) {
-        cout << "Erro: Pessoa com nome '" << nome << "' nao encontrada." << endl;
-        return raiz;
-    }
+void Arvore::inserir(string nome, char sexo, int idade, float peso) {
+    raiz = inserirAux(raiz, nome, sexo, idade, peso);
+}
 
-    if (nome < raiz->dados.nome) {
-        raiz->esq = removerPessoa(raiz->esq, nome);
-    } else if (nome > raiz->dados.nome) {
-        raiz->dir = removerPessoa(raiz->dir, nome);
-    } else {
-        // Nó encontrado! Vamos removê-lo
+// ---- Lógica de Remoção ----
 
-        // Caso 1: Nó com 0 ou 1 filho
-        if (raiz->esq == NULL || raiz->dir == NULL) {
-            NoArvore *temp = raiz->esq ? raiz->esq : raiz->dir;
+No* Arvore::removerAux(No* raiz, string nome) {
+    if (raiz == nullptr) return raiz;
 
-            if (temp == NULL) { // 0 filhos
+    if (nome < raiz->nome)
+        raiz->esq = removerAux(raiz->esq, nome);
+    else if (nome > raiz->nome)
+        raiz->dir = removerAux(raiz->dir, nome);
+    else {
+        // Nó encontrado
+        if ((raiz->esq == nullptr) || (raiz->dir == nullptr)) {
+            No* temp = raiz->esq ? raiz->esq : raiz->dir;
+            if (temp == nullptr) {
                 temp = raiz;
-                raiz = NULL;
-            } else { // 1 filho
-                *raiz = *temp; // Copia o conteúdo do filho
+                raiz = nullptr;
+            } else {
+                *raiz = *temp;
             }
             delete temp;
         } else {
-            // Caso 2: Nó com 2 filhos
-            // Pega o sucessor em ordem (menor da subárvore direita)
-            NoArvore* temp = menorNo(raiz->dir);
-
-            // Copia os dados do sucessor para este nó
-            raiz->dados = temp->dados;
-
-            // Remove o sucessor (que agora é uma duplicata)
-            raiz->dir = removerPessoa(raiz->dir, temp->dados.nome);
+            No* temp = menorNo(raiz->dir);
+            raiz->nome = temp->nome;
+            raiz->sexo = temp->sexo;
+            raiz->idade = temp->idade;
+            raiz->peso = temp->peso;
+            raiz->dir = removerAux(raiz->dir, temp->nome);
         }
     }
 
-    // Se a árvore ficou vazia após a remoção (era o único nó)
-    if (raiz == NULL) {
-        return raiz;
-    }
+    if (raiz == nullptr) return raiz;
 
-    // 2. Atualizar a altura
-    atualizarAltura(raiz);
+    raiz->altura = 1 + max(getAltura(raiz->esq), getAltura(raiz->dir));
+    int balance = getBalanceamento(raiz);
 
-    // 3. Obter o fator de balanceamento
-    int fb = fatorBalanceamento(raiz);
-
-    // 4. Rebalancear, se necessário (4 casos)
-
-    // Caso LL
-    if (fb > 1 && fatorBalanceamento(raiz->esq) >= 0) {
+    if (balance > 1 && getBalanceamento(raiz->esq) >= 0)
         return rotacaoDireita(raiz);
-    }
 
-    // Caso LR
-    if (fb > 1 && fatorBalanceamento(raiz->esq) < 0) {
+    if (balance > 1 && getBalanceamento(raiz->esq) < 0) {
         raiz->esq = rotacaoEsquerda(raiz->esq);
         return rotacaoDireita(raiz);
     }
 
-    // Caso RR
-    if (fb < -1 && fatorBalanceamento(raiz->dir) <= 0) {
+    if (balance < -1 && getBalanceamento(raiz->dir) <= 0)
         return rotacaoEsquerda(raiz);
-    }
 
-    // Caso RL
-    if (fb < -1 && fatorBalanceamento(raiz->dir) > 0) {
+    if (balance < -1 && getBalanceamento(raiz->dir) > 0) {
         raiz->dir = rotacaoDireita(raiz->dir);
         return rotacaoEsquerda(raiz);
     }
@@ -250,221 +156,83 @@ NoArvore *removerPessoa(NoArvore *raiz, string nome) {
     return raiz;
 }
 
-
-// --- Consulta de Dado ---
-Pessoa* consultarPessoa(NoArvore *raiz, string nome) {
-    if (raiz == NULL) {
-        return NULL; // Não encontrado
+void Arvore::remover(string nome) {
+    if (consultarAux(raiz, nome) == nullptr) {
+        cout << "> Erro: Pessoa nao encontrada na arvore." << endl;
+        return;
     }
+    raiz = removerAux(raiz, nome);
+    cout << "> Pessoa removida com sucesso!" << endl;
+}
 
-    if (nome == raiz->dados.nome) {
-        return &(raiz->dados); // Encontrado! Retorna ponteiro para os dados
-    }
+// ---- Lógica de Consulta ----
 
-    if (nome < raiz->dados.nome) {
-        return consultarPessoa(raiz->esq, nome);
+No* Arvore::consultarAux(No* raiz, string nome) {
+    if (raiz == nullptr || raiz->nome == nome)
+        return raiz;
+
+    if (nome < raiz->nome)
+        return consultarAux(raiz->esq, nome);
+
+    return consultarAux(raiz->dir, nome);
+}
+
+void Arvore::consultar(string nome) {
+    No* res = consultarAux(raiz, nome);
+    if (res != nullptr) {
+        cout << endl;
+        cout << "--------------------------------------------" << endl;
+        cout << "              REGISTRO ENCONTRADO           " << endl;
+        cout << "--------------------------------------------" << endl;
+        cout << "Nome: " << res->nome << endl;
+        cout << "Sexo: " << res->sexo << endl;
+        cout << "Idade: " << res->idade << endl;
+        cout << "Peso: " << res->peso << endl;
     } else {
-        return consultarPessoa(raiz->dir, nome);
+        cout << "> Registro nao encontrado para: " << nome << endl;
     }
 }
 
-// --- Listagem de Árvore (Em Ordem) ---
-void imprimirEmOrdem(NoArvore *raiz) {
-    if (raiz == NULL) {
+// ---- Lógica de Listagem ----
+
+void Arvore::listarAux(No* atual) {
+    if (atual == nullptr) return;
+
+    listarAux(atual->esq);
+
+    cout << "Nome: " << atual->nome
+         << " | Sexo: " << atual->sexo
+         << " | Idade: " << atual->idade
+         << " | Peso: " << atual->peso << endl;
+
+    listarAux(atual->dir);
+}
+
+void Arvore::listar() {
+    if (raiz == nullptr) {
+        cout << "> A arvore esta vazia." << endl;
         return;
     }
-    imprimirEmOrdem(raiz->esq);
-    
-    cout << "  - Nome: " << raiz->dados.nome
-         << ", Sexo: " << raiz->dados.sexo
-         << ", Idade: " << raiz->dados.idade
-         << ", Peso: " << raiz->dados.peso << endl;
-         
-    imprimirEmOrdem(raiz->dir);
+    listarAux(raiz);
 }
 
+// ---- Geração de Listas ----
 
-/**
- * 5. FUNÇÕES DE LISTAGEM POR SEXO (Reutilizadas do seu código)
- */
+void Arvore::gerarListasAux(No* atual, list<No*>& homens, list<No*>& mulheres) {
+    if (atual == nullptr) return;
 
-// Função de impressão (fornecida por você)
-void imprimirLista(const string &titulo, const vector<Pessoa> &lista) {
-    cout << "--- " << titulo << " ---" << endl;
-    if (lista.empty()) {
-        cout << "(Lista vazia)" << endl;
-        return;
-    }
-    for (const auto &p : lista) {
-        cout << "Nome: " << p.nome
-             << ", Sexo: " << p.sexo
-             << ", Idade: " << p.idade
-             << ", Peso: " << p.peso << endl;
-    }
-    cout << endl;
+    gerarListasAux(atual->esq, homens, mulheres);
+
+    if (atual->sexo == 'M' || atual->sexo == 'm')
+        homens.push_back(atual);
+    else if (atual->sexo == 'F' || atual->sexo == 'f')
+        mulheres.push_back(atual);
+
+    gerarListasAux(atual->dir, homens, mulheres);
 }
 
-// Função de preenchimento (fornecida por você)
-void preencherListasPorSexo(NoArvore *no,
-                            vector<Pessoa> &listaHomens,
-                            vector<Pessoa> &listaMulheres)
-{
-    if (no == NULL) {
-        return;
-    }
-    preencherListasPorSexo(no->esq, listaHomens, listaMulheres);
-    if (no->dados.sexo == 'M' || no->dados.sexo == 'm') {
-        listaHomens.push_back(no->dados);
-    } else if (no->dados.sexo == 'F' || no->dados.sexo == 'f') {
-        listaMulheres.push_back(no->dados);
-    }
-    preencherListasPorSexo(no->dir, listaHomens, listaMulheres);
-}
-
-// Função principal de listagem (fornecida por você)
-void gerarListasOrdenadas(NoArvore *RAIZ,
-                          vector<Pessoa> &listaHomens,
-                          vector<Pessoa> &listaMulheres)
-{
-    listaHomens.clear();
-    listaMulheres.clear();
-    preencherListasPorSexo(RAIZ, listaHomens, listaMulheres);
-}
-
-// Função de limpeza (fornecida por você)
-void limparArvore(NoArvore *no)
-{
-    if (no == NULL)
-        return;
-    limparArvore(no->esq);
-    limparArvore(no->dir);
-    delete no;
-}
-
-// Função auxiliar para limpar o buffer de entrada (cin)
-void limparBufferEntrada() {
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-}
-
-/**
- * 6. FUNÇÃO MAIN (Menu)
- */
-
-int main() {
-    NoArvore* RAIZ = NULL;
-    int opcao = -1;
-
-    while (opcao != 0) {
-        cout << "\n--- MENU ARVORE AVL ---" << endl;
-        cout << "1. Inserir Pessoa" << endl;
-        cout << "2. Remover Pessoa" << endl;
-        cout << "3. Consultar Pessoa" << endl;
-        cout << "4. Listar Arvore (em ordem)" << endl;
-        cout << "5. Listar por Sexo (H/M)" << endl;
-        cout << "0. Sair" << endl;
-        cout << "-----------------------" << endl;
-        cout << "Escolha uma opcao: ";
-        
-        cin >> opcao;
-
-        // Validação de entrada
-        if (cin.fail()) {
-            cout << "Entrada invalida. Por favor, digite um numero." << endl;
-            cin.clear();
-            limparBufferEntrada();
-            opcao = -1; // Reseta a opção para continuar no loop
-            continue;
-        }
-
-        limparBufferEntrada(); // Limpa o '\n' deixado pelo cin >>
-
-        switch (opcao) {
-            case 1: {
-                // Inserir
-                string nome, temp;
-                char sexo;
-                int idade;
-                double peso;
-                
-                cout << "Nome: ";
-                getline(cin, nome);
-                cout << "Sexo (M/F): ";
-                cin >> sexo;
-                sexo = toupper(sexo); // Garante maiúscula
-                cout << "Idade: ";
-                cin >> idade;
-                cout << "Peso: ";
-                cin >> peso;
-                limparBufferEntrada(); // Limpa o buffer após o último cin >>
-
-                if (sexo != 'M' && sexo != 'F') {
-                    cout << "Sexo invalido. Abortando insercao." << endl;
-                } else {
-                    Pessoa p(nome, sexo, idade, peso);
-                    RAIZ = inserirPessoa(RAIZ, p);
-                    cout << "Pessoa inserida (ou ja existia)." << endl;
-                }
-                break;
-            }
-            case 2: {
-                // Remover
-                string nome;
-                cout << "Nome da pessoa a remover: ";
-                getline(cin, nome);
-                RAIZ = removerPessoa(RAIZ, nome);
-                cout << "Remocao tentada." << endl;
-                break;
-            }
-            case 3: {
-                // Consultar
-                string nome;
-                cout << "Nome da pessoa a consultar: ";
-                getline(cin, nome);
-                Pessoa* p = consultarPessoa(RAIZ, nome);
-                if (p != NULL) {
-                    cout << "Pessoa encontrada:" << endl;
-                    cout << "  - Nome: " << p->nome
-                         << ", Sexo: " << p->sexo
-                         << ", Idade: " << p->idade
-                         << ", Peso: " << p->peso << endl;
-                } else {
-                    cout << "Pessoa com nome '" << nome << "' nao encontrada." << endl;
-                }
-                break;
-            }
-            case 4: {
-                // Listar (em ordem)
-                cout << "\n--- Listagem em Ordem Alfabética ---" << endl;
-                if (RAIZ == NULL) {
-                    cout << "(Arvore vazia)" << endl;
-                } else {
-                    imprimirEmOrdem(RAIZ);
-                }
-                break;
-            }
-            case 5: {
-                // Listar por Sexo
-                vector<Pessoa> homens, mulheres;
-                gerarListasOrdenadas(RAIZ, homens, mulheres);
-                
-                cout << "\n--- Listagem por Sexo ---" << endl;
-                imprimirLista("Homens", homens);
-                imprimirLista("Mulheres", mulheres);
-                break;
-            }
-            case 0: {
-                // Sair
-                cout << "Encerrando o programa..." << endl;
-                break;
-            }
-            default: {
-                cout << "Opcao invalida. Tente novamente." << endl;
-                break;
-            }
-        }
-    }
-
-    // Limpa toda a memória alocada pela árvore antes de sair
-    limparArvore(RAIZ);
-    return 0;
+void Arvore::gerarListas(list<No*>& homens, list<No*>& mulheres) {
+    homens.clear();
+    mulheres.clear();
+    gerarListasAux(raiz, homens, mulheres);
 }

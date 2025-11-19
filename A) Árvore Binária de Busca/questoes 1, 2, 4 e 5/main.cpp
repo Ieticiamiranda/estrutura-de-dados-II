@@ -19,14 +19,14 @@ int main()
         {
             ArvoreBin arvore;
 
-            int valores_iniciais[] = {20, 5, 12, 36, 27, 45, 9, 2, 6, 17, 40};
+            int valores_iniciais[] = {20, 5, 12, 36, 27, 45, 9, 2, 6, 17, 40}; // a) - parte A
             for (int val : valores_iniciais)
             {
                 arvore.inserir(val);
             }
-            arvore.remover(9);
-            arvore.remover(5);
-            arvore.remover(20);
+            arvore.remover(9); // b) - parte A
+            arvore.remover(5); // b) - parte A
+            arvore.remover(20); // b) - parte A
 
             int escolha_arvore;
             int valor;
@@ -51,13 +51,13 @@ int main()
                     arvore.remover(valor);
                     break;
                 case 4:
-                    arvore.encontrarMaximo();
+                    arvore.encontrarMaximo(); // questao 2 - parte A
                     break;
                 case 5:
-                    arvore.mostrarRepetidos();
+                    arvore.mostrarRepetidos(); // questao 4 - parte A
                     break;
                 case 6:
-                    arvore.verificarArvoreCheia();
+                    arvore.verificarArvoreCheia(); // questao 5 - parte A
                     break;
                 case 7:
                     cout << "> Voltando ao Menu Principal..." << endl;
@@ -76,10 +76,6 @@ int main()
         break;
 
         case 2:
-            menuArvorePessoas();
-            break;
-
-        case 3:
             cout << "> Saindo do programa..." << endl;
             break;
 
@@ -88,7 +84,7 @@ int main()
             system("pause");
         }
 
-    } while (escolhaPrincipal != 3);
+    } while (escolhaPrincipal != 2);
 
     return 0;
 }

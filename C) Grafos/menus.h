@@ -10,4 +10,8 @@ void inserirAresta(Graph *G);
 void removerAresta(Graph *G);
 void executarFloyd();
 
+void imprimirMatrizUI(Graph *G, int tipo);
+void exibirGrauGUI(Graph *G);
+void listaGrafoUI(Graph *G);
+
 #endif

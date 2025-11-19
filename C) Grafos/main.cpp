@@ -1,6 +1,7 @@
 #include "Grafo.h"
 #include "menus.h"
 #include <iostream>
+
 using namespace std;
 
 int main()
@@ -18,11 +19,10 @@ int main()
         {
             delete G;
             G = new Graph();
+            
             if (G->entGrafoArquivo("grafo.txt") > 0)
             {
-                G->matrizAdj();
-                G->numArestas();
-                G->grauG();
+                cout << "> Grafo G(V,A) instanciado!" << endl;
                 system("pause");
 
                 bool sair_q1 = false;
@@ -38,16 +38,16 @@ int main()
                         removerAresta(G);
                         break;
                     case 3:
-                        G->imprimirMatriz(2);
+                        imprimirMatrizUI(G, 2);
                         break;
                     case 4:
-                        G->imprimirMatriz(1);
+                        imprimirMatrizUI(G, 1);
                         break;
                     case 5:
-                        G->exibirGrauG();
+                        exibirGrauGUI(G);
                         break;
                     case 6:
-                        G->listaGrafo();
+                        listaGrafoUI(G);
                         break;
                     case 7:
                         sair_q1 = true;
@@ -61,7 +61,7 @@ int main()
             }
             else
             {
-                cout << "Falha ao carregar grafo.txt" << endl;
+                cout << "> Falha ao carregar grafo.txt" << endl;
                 delete G;
                 G = nullptr;
                 system("pause");
@@ -82,5 +82,6 @@ int main()
     }
 
     delete G;
+    cout << "> Grafo desalocado!" << endl;
     return 0;
 }
