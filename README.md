@@ -3,7 +3,7 @@
 *Este repositório reúne implementações de **estruturas de dados avançadas** desenvolvidas em **C++**, como parte da disciplina de **Laboratório de Estrutura de Dados**, lecionada pelo Prof. Francisco Chagas de Lima Júnior. O objetivo é demonstrar conceitos como árvores, grafos e estruturas dinâmicas, mantendo organização modular e boas práticas.*
 
 <p align="center">
-  <img width="2000" height="768" alt="image" src="https://github.com/user-attachments/assets/7640c3e8-5518-479d-b12f-abc129cda875" />
+  <img width="2000" height="768" alt="image" src="https://github.com/user-attachments/assets/b5efbdba-c15b-4ced-9b8d-5f103527a166" />
 </p>
 
 ---
