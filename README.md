@@ -3,7 +3,7 @@
 *Este repositório reúne implementações de **estruturas de dados avançadas** desenvolvidas em **C++**, como parte da disciplina de **Laboratório de Estrutura de Dados**, lecionada pelo Prof. Francisco Chagas de Lima Júnior. O objetivo é demonstrar conceitos como árvores, grafos e estruturas dinâmicas, mantendo organização modular e boas práticas.*
 
 <p align="center">
-  <img width="2000" height="768" alt="image" src="https://github.com/user-attachments/assets/b5efbdba-c15b-4ced-9b8d-5f103527a166" />
+  <img width="2000" height="768" alt="image" src="https://raw.githubusercontent.com/Ieticiamiranda/estrutura-de-dados-II/main/A)%20Árvore%20Binária%20de%20Busca/gemeo-digital-no-conceito-de-metaverso-pessoas-com-oculos-de-realidade-virtual-criando-e-interagindo-com-seu-avatar-digital-personagens-no-espaco-futurista-de-holograma-3d-inovacao-futura-comunicacao-vr.png" />
 </p>
 
 ---
